@@ -93,6 +93,43 @@ export default function Home() {
     return () => clearInterval(sdInterval)
   }, [])
 
+  const completeSession = () => {
+    if (cycleType === 'FOCUS') {
+      // Focus cycle completed - save session and show choice menu
+      playSound('complete')
+      const newSession = {
+        id: Date.now(),
+        duration: currentPreset,
+        objective: currentObjective,
+        completedAt: new Date().toISOString(),
+      }
+      const updated = [...sessions, newSession]
+      setSessions(updated)
+      setSessionCount(prev => prev + 1)
+      localStorage.setItem('lcars-sessions', JSON.stringify(updated))
+      
+      // Show notification
+      const notificationBody = currentObjective 
+        ? `"${currentObjective}" - ${currentPreset} minute focus cycle complete!`
+        : `${currentPreset} minute focus cycle complete!`
+      showNotification('Focus Cycle Complete!', notificationBody)
+      
+      // Show choice menu instead of auto-switching
+      setShowChoiceMenu(true)
+      
+    } else {
+      // Break completed - start new focus cycle
+      playSound('breakOver')
+      showNotification('Break Complete!', 'Time to get back to work! Starting new focus cycle.')
+      setCycleType('FOCUS')
+      setSecondsLeft(currentPreset * 60)
+      setTimeout(() => {
+        playSound('start')
+        setIsRunning(true)
+      }, 1000)
+    }
+  }
+
   // Timer countdown
   useEffect(() => {
     if (!isRunning) return
@@ -139,43 +176,6 @@ export default function Home() {
     window.addEventListener('keydown', handleKey)
     return () => window.removeEventListener('keydown', handleKey)
   }, [])
-
-  const completeSession = () => {
-    if (cycleType === 'FOCUS') {
-      // Focus cycle completed - save session and show choice menu
-      playSound('complete')
-      const newSession = {
-        id: Date.now(),
-        duration: currentPreset,
-        objective: currentObjective,
-        completedAt: new Date().toISOString(),
-      }
-      const updated = [...sessions, newSession]
-      setSessions(updated)
-      setSessionCount(prev => prev + 1)
-      localStorage.setItem('lcars-sessions', JSON.stringify(updated))
-      
-      // Show notification
-      const notificationBody = currentObjective 
-        ? `"${currentObjective}" - ${currentPreset} minute focus cycle complete!`
-        : `${currentPreset} minute focus cycle complete!`
-      showNotification('Focus Cycle Complete!', notificationBody)
-      
-      // Show choice menu instead of auto-switching
-      setShowChoiceMenu(true)
-      
-    } else {
-      // Break completed - start new focus cycle
-      playSound('breakOver')
-      showNotification('Break Complete!', 'Time to get back to work! Starting new focus cycle.')
-      setCycleType('FOCUS')
-      setSecondsLeft(currentPreset * 60)
-      setTimeout(() => {
-        playSound('start')
-        setIsRunning(true)
-      }, 1000)
-    }
-  }
 
   const handleBreakChoice = () => {
     setShowChoiceMenu(false)
