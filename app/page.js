@@ -107,7 +107,7 @@ export default function Home() {
       })
     }, 1000)
     return () => clearInterval(interval)
-  }, [isRunning])
+  }, [isRunning, completeSession])
 
   // Browser tab title shows countdown
   useEffect(() => {
@@ -520,7 +520,7 @@ export default function Home() {
                     </div>
                     {session.objective && (
                       <div className="text-xs mt-1 italic" style={{color: 'var(--lcars-text-light)'}}>
-                        "{session.objective}"
+                        &quot;{session.objective}&quot;
                       </div>
                     )}
                   </div>
